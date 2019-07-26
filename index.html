@@ -1,79 +1,95 @@
-
-  <!doctype html>
+<!doctype html>
 <html>
-  <head>
-    <meta charset="utf-8">
-    <title>Page Title</title>
-    <meta name="description" content="Webpage for xxxx">
-    <!-- http://meyerweb.com/eric/tools/css/reset/ -->
-    <link rel="stylesheet" href="css/reset/reset.css">
-    <!--[if lt IE 9]>
+
+<head>
+  <meta charset="utf-8">
+  <title>Page Title</title>
+  <meta name="description" content="Webpage for xxxx">
+  <!--[if lt IE 9]>
       <script src="//html5shiv.googlecode.com/svn/trunk/html5.js" type="text/javascript"></script>
-<!-- Load d3.js -->
-<script src="https://d3js.org/d3.v4.js"></script>
-    <![endif]-->
-  </head>
-  <body> 
-    <!-- Create a div where the graph will take place -->
-<div id="my_dataviz"></div>
+          <![endif]-->
+  <!-- Load d3.js -->
+  <script src="https://d3js.org/d3.v4.js"></script>
 
-<script>
+</head>
 
-// set the dimensions and margins of the graph
-var margin = {top: 10, right: 30, bottom: 30, left: 50},
-    width = 460 - margin.left - margin.right,
-    height = 400 - margin.top - margin.bottom;
+<body>
+  <!-- Create a div where the graph will take place -->
+  <div id="my_dataviz"></div>
 
-// append the svg object to the body of the page
-var svg = d3.select("#my_dataviz")
-  .append("svg")
-    .attr("width", width + margin.left + margin.right)
-    .attr("height", height + margin.top + margin.bottom)
-    .append("g")
-    .attr("transform",
-          "translate(" + margin.left + "," + margin.top + ")");
+  <script>
 
-//Read the data
-d3.csv("https://raw.githubusercontent.com/jcjveraa/dropsonline/master/data.csv",
+    // set the dimensions and margins of the graph
+    var margin = { top: 10, right: 30, bottom: 30, left: 50 },
+      width = 460 - margin.left - margin.right,
+      height = 400 - margin.top - margin.bottom;
 
-  // When reading the csv, I must format variables:
-  function(d){
-    return { mass: d.Mass, slight: d.Slight, minor: d.Minor, major: d.Major, fatality: d.Fatality}
-  },
+    // append the svg object to the body of the page
+    var svg = d3.select("#my_dataviz")
+      .append("svg")
+      .attr("width", width + margin.left + margin.right)
+      .attr("height", height + margin.top + margin.bottom)
+      .append("g")
+      .attr("transform",
+        "translate(" + margin.left + "," + margin.top + ")");
 
-  // Now I can use this dataset:
-  function(data) {
+    //Read the data
+    d3.csv("https://raw.githubusercontent.com/jcjveraa/dropsonline/master/data.csv",
 
-    // Add X axis --> it is a date format
-    var x = d3.scaleLinear()
-      .domain([0, d3.max(data, function(d) { return +d.Mass; })])
-      .range([ 0, width ]);
-    svg.append("g")
-      .attr("transform", "translate(0," + height + ")")
-      .call(d3.axisBottom(x));
+      // When reading the csv, I must format variables:
+      function (d) {
+        //console.log(d);
+        return { mass: +d.Mass, slight: +d.Slight, minor: +d.Minor, major: +d.Major, fatality: +d.Fatality}
+      },
 
-    // Add Y axis
-    var y = d3.scaleLinear()
-      .domain([0, d3.max(data, function(d) { return +d.Major; })])
-      .range([ height, 0 ]);
-    svg.append("g")
-      .call(d3.axisLeft(y));
+      // Now I can use this dataset:
+      function (data) {
+        //console.log(data);
+        // Add X axis --> it is a date format
+        var x = d3.scaleLinear()
+          .domain([0, d3.max(data, function (d) { return +d.mass; })])
+          .range([0, width]);
+        svg.append("g")
+          .attr("transform", "translate(0," + height + ")")
+          .call(d3.axisBottom(x));
 
-    // Add the area
-    svg.append("path")
-      .datum(data)
-      .attr("fill", "#cce5df")
-      .attr("stroke", "#69b3a2")
-      .attr("stroke-width", 1.5)
-      .attr("d", d3.area()
-        .x(function(d) { return x(d.date) })
-        .y0(y(0))
-        .y1(function(d) { return y(d.value) })
-        )
+        // Add Y axis
+        var y = d3.scaleLinear()
+          .domain([0, d3.max(data, function (d) { return +d.slight; })])
+          .range([height, 0]);
+        svg.append("g")
+          .call(d3.axisLeft(y));
 
-})
+        
 
-</script>
-  </body>
-    
+          
+        // Add the area
+        svg.append("path")
+          .datum(data)
+          .attr("fill", "#cce5df")
+          // .attr("stroke", "#00ff00")
+          // .attr("stroke-width", 1.5)
+          .attr("d", d3.area()
+            .x(function (d) { return x(d.mass) })
+            .y0(y(0))
+            .y1(function (d) { return y(d.major) })
+          )
+
+          // Add the area
+        svg.append("path")
+          .datum(data)
+          .attr("fill", "#cce5df")
+          .attr("stroke", "#69b3a2")
+          .attr("stroke-width", 1.5)
+          .attr("d", d3.area()
+            .x(function (d) { return x(d.mass) })
+            .y0(y(0))
+            .y1(function (d) { return y(d.slight) })
+          )
+
+      })
+
+  </script>
+</body>
+
 </html>
