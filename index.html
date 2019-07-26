@@ -17,10 +17,23 @@
   <!-- Create a div where the graph will take place -->
   <div id="my_dataviz"></div>
 
+  <!-- Add input for mass-->
+  mass:
+  <input type="number" id="mass_input" value=0.1 step=0.1 min=0 max=10>
+
+  <!-- Add  input for height-->
+  height:
+  <input type="number" id="height_input" value=13 step=0.5 min=0 max=15>
+
+  <div id="incident_result">
+    This incident would be classified as:
+    <span id="damage_result"></span>.
+  </div>
+
   <script>
 
     // set the dimensions and margins of the graph
-    var margin = { top: 30, right: 30, bottom: 30, left: 50 },
+    var margin = { top: 30, right: 50, bottom: 50, left: 50 },
       width = 600 - margin.left - margin.right,
       height = 400 - margin.top - margin.bottom;
 
@@ -33,8 +46,52 @@
       .attr("transform",
         "translate(" + margin.left + "," + margin.top + ")");
 
+
+    var margin_joules = { top: 30, right: 50, bottom: 50, left: 0 },
+      width_joules = 120 - margin_joules.left - margin_joules.right,
+      height_joules = 400 - margin_joules.top - margin_joules.bottom;
+
+    // append the svg object to the body of the page
+    var svg_joules = d3.select("#my_dataviz")
+      .append("svg")
+      .attr("width", width_joules + margin_joules.left + margin_joules.right)
+      .attr("height", height_joules + margin_joules.top + margin_joules.bottom)
+      .append("g")
+      .attr("transform",
+        "translate(" + margin_joules.left + "," + margin_joules.top + ")");
+
+    // Add Y axis
+    var y_joules = d3.scaleLinear()
+      .domain([0, 60])
+      .range([height_joules, 0]);
+    svg_joules.append("g")
+      .attr("transform", "translate(" + margin_joules.right + ",0)")
+      .call(d3.axisLeft(y_joules));
+
+    // text label for the y axis
+    svg_joules.append("text")
+      .attr("transform", "rotate(-90)")
+      .attr("y", 0 - margin_joules.left)
+      .attr("x", 0 - (height_joules / 2))
+      .attr("dy", "1em")
+      .style("text-anchor", "middle")
+      .text("Joules");
+
+    joulesbar = svg_joules.append("rect")
+      .attr("fill", "#ff0000")
+      .attr("x", margin_joules.right + width_joules / 4)
+      .attr("y", y_joules(15))
+      .attr("width", width_joules / 2)
+      .attr("height", height_joules - y_joules(15));
+
+    // var the_data = d3.csv("https://raw.githubusercontent.com/jcjveraa/dropsonline/master/data.raw.csv", function (d) {
+    //   //console.log(d);
+    //   return { mass: +d.Mass, slight: +d.Slight, minor: +d.Minor, major: +d.Major, fatality: +d.Fatality }
+    // });
+    // console.log(the_data);
+
     //Get the graph data
-    d3.csv("https://raw.githubusercontent.com/jcjveraa/dropsonline/master/data.clipped.csv",
+    d3.csv("https://raw.githubusercontent.com/jcjveraa/dropsonline/master/data.raw.csv",
 
       function (d) {
         //console.log(d);
@@ -43,7 +100,7 @@
 
       // Now I can use this dataset:
       function (data) {
-        //console.log(data);
+        // console.log(data);
         // Add X axis --> it is a date format
         var x = d3.scaleLinear()
           .domain([0, d3.max(data, function (d) { return d.mass; })])
@@ -53,10 +110,10 @@
           .call(d3.axisBottom(x));
 
         var x_lbs = d3.scaleLinear()
-          .domain([0, d3.max(data, function (d) { return d.mass*2.20462262; })])
+          .domain([0, d3.max(data, function (d) { return d.mass * 2.20462262; })])
           .range([0, width]);
-          svg.append("g")
-         // .attr("transform", "translate(0," + margin.top + ")")
+        svg.append("g")
+          // .attr("transform", "translate(0," + margin.top + ")")
           .call(d3.axisTop(x_lbs));
 
         // Add Y axis
@@ -68,22 +125,43 @@
           .call(d3.axisLeft(y));
 
 
-        // // Background red fatal incident area
-        // svg.append("rect")
-        //   .attr("fill", "#ff0000")
-        //   // .attr("stroke", "#000000")
-        //   // .attr("stroke-width", 1.5)
-        //   .attr("x", 0)
-        //   .attr("y", 0)
-        //   .attr("width", width)
-        //   .attr("height", height)
+        // Add Y axis
+        var y_ft = d3.scaleLinear()
+          //.domain([0, d3.max(data, function (d) { return d.slight; })])
+          .domain([0, 15 * 3.2808399])
+          .range([height, 0]);
+        svg.append("g")
+          .attr("transform", "translate(" + width + ",0)")
+          .call(d3.axisRight(y_ft));
+
+        // Add a clipPath: everything out of this area won't be drawn.
+        var clip = svg.append("defs").append("SVG:clipPath")
+          .attr("id", "clip")
+          .append("SVG:rect")
+          .attr("width", width)
+          .attr("height", height)
+          .attr("x", 1)
+          .attr("y", 1);
+
+        // Background red fatal incident area
+        // offset 1 for axis
+        svg.append("rect")
+          .attr("class", "dropgraph")
+          .attr("fill", "#ff0000")
+          .attr("class", "dropgraph")
+          .attr("x", 1)
+          .attr("y", 1)
+          .attr("width", width - 1)
+          .attr("height", height - 1)
+        // .attr("clip-path", "url(#clip)")
 
         // Major incident area
         svg.append("path")
           .datum(data)
+          .attr("class", "dropgraph")
           .attr("fill", "#ff6600")
-          .attr("stroke", "#000000")
-          .attr("stroke-width", 1.5)
+          // .attr("stroke", "#000000")
+          // .attr("stroke-width", 1.5)
           .attr("d", d3.area()
             .x(function (d) { return x(d.mass) })
             .y0(y(0))
@@ -93,9 +171,10 @@
         // Minor incident area
         svg.append("path")
           .datum(data)
+          .attr("class", "dropgraph")
           .attr("fill", "#ffff00")
-          .attr("stroke", "#000000")
-          .attr("stroke-width", 1.5)
+          // .attr("stroke", "#000000")
+          // .attr("stroke-width", 1.5)
           .attr("d", d3.area()
             .x(function (d) { return x(d.mass) })
             .y0(y(0))
@@ -105,24 +184,142 @@
         // Slight incident area
         svg.append("path")
           .datum(data)
+          .attr("class", "dropgraph")
           .attr("fill", "#00ff00")
-          .attr("stroke", "#000000")
-          .attr("stroke-width", 1.5)
+          // .attr("stroke", "#000000")
+          // .attr("stroke-width", 1.5)
           .attr("d", d3.area()
             .x(function (d) { return x(d.mass) })
             .y0(y(0))
             .y1(function (d) { return y(d.slight) })
           )
 
-        // Indication of where this incident is
-        svg.append('circle')
-          .attr('cx', 100)
-          .attr('cy', 100)
-          .attr('r', 10)
-          .attr('stroke', 'black')
-          .attr('fill', '#69a3b2');
+        // Add the line for minor/major
+        svg.append("path")
+          .datum(data)
+          .attr("class", "dropgraph")
+          .attr("fill", "none")
+          .attr("stroke", "#000000")
+          .attr("stroke-width", 2)
+          .attr("d", d3.line()
+            .x(function (d) { return x(d.mass) })
+            .y(function (d) { return y(d.major) })
+          )
+
+        // Add the line for slight/minor
+        svg.append("path")
+          .datum(data)
+          .attr("class", "dropgraph")
+          .attr("fill", "none")
+          .attr("stroke", "#000000")
+          .attr("stroke-width", 2)
+          .attr("d", d3.line()
+            .x(function (d) { return x(d.mass) })
+            .y(function (d) { return y(d.minor) })
+          )
+
+        // Add the line for no damage/slight
+        svg.append("path")
+          .datum(data)
+          .attr("class", "dropgraph")
+          .attr("fill", "none")
+          .attr("stroke", "#000000")
+          .attr("stroke-width", 2)
+          .attr("d", d3.line()
+            .x(function (d) { return x(d.mass) })
+            .y(function (d) { return y(d.slight) })
+          )
+
+
+        // text label for the y axis
+        svg.append("text")
+          .attr("transform", "rotate(-90)")
+          .attr("y", 0 - margin.left)
+          .attr("x", 0 - (height / 2))
+          .attr("dy", "1em")
+          .style("text-anchor", "middle")
+          .text("Height");
+
+        // text label for the x axis
+        svg.append("text")
+          .attr("transform",
+            "translate(" + (width / 2) + " ," +
+            (height + margin.top + 10) + ")")
+          .style("text-anchor", "middle")
+          .text("Mass");
+
+        // Initialize a circle
+        var theCircle = svg.append("circle")
+          .attr("cx", -1000)
+          .attr("class", "movingdot")
+          .attr("cy", -1000)
+          .attr("stroke", "black")
+          .style("fill", "#0000ff")
+          .attr("r", 7);
+
+        d3.selectAll(".dropgraph")
+          .attr("clip-path", "url(#clip)")
+
+        var bisect = d3.bisector(function (d) { return d.mass; }).right;
+
+        // A function that update the color circle
+        function moveDot() {
+
+          var mass = d3.select("#mass_input").property("value");
+          var height = d3.select("#height_input").property("value");
+          var joules = mass * height * 9.81;
+          if (joules > 60) {
+            var joules = 60;
+          }
+          var joules_color = "#ff0000";
+          if (joules < 40) {
+            joules_color = "#00ff00";
+          }
+          // console.log(mass, x(mass), height, y(height));
+
+          theCircle
+            .transition()
+            .duration(300)
+            .attr("cx", x(mass))
+            .attr("cy", y(height));
+
+          joulesbar
+            .transition()
+            .duration(300)
+            .attr("fill", joules_color)
+            .attr("y", y_joules(joules))
+            .attr("height", height_joules - y_joules(joules));
+
+
+
+          var item = data[bisect(data, mass)];
+          // console.log(item);
+
+          if (height < item.slight) {
+            d3.select("#damage_result").text("Slight");
+          }
+          else if (height < item.minor) {
+            d3.select("#damage_result").text("Minor");
+          }
+
+          else if (height < item.major) {
+            d3.select("#damage_result").text("Major");
+          }
+          else {
+            d3.select("#damage_result").text("Fatality");
+          }
+
+
+        }
+
+        // Add an event listener to the button created in the html part
+        d3.select("#height_input").on("input", moveDot)
+        d3.select("#mass_input").on("input", moveDot)
+
 
       })
+
+
 
   </script>
 </body>
