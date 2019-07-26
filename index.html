@@ -3,8 +3,8 @@
 
 <head>
   <meta charset="utf-8">
-  <title>Page Title</title>
-  <meta name="description" content="Webpage for xxxx">
+  <title>Dropsonline</title>
+  <meta name="Dropsonline" content="Interactive dropsonline app">
   <!--[if lt IE 9]>
       <script src="//html5shiv.googlecode.com/svn/trunk/html5.js" type="text/javascript"></script>
           <![endif]-->
@@ -32,10 +32,14 @@
 
   <script>
 
+    var basesize = 150;
+    var maxheight = 15;
+    var maxjoules = 60;
+
     // set the dimensions and margins of the graph
-    var margin = { top: 30, right: 50, bottom: 50, left: 50 },
-      width = 600 - margin.left - margin.right,
-      height = 400 - margin.top - margin.bottom;
+    var margin = { top: 0.3*basesize, right: 0.5*basesize, bottom: 0.5*basesize, left: 0.5*basesize },
+      width = 6*basesize - margin.left - margin.right,
+      height = 4*basesize - margin.top - margin.bottom;
 
     // append the svg object to the body of the page
     var svg = d3.select("#my_dataviz")
@@ -47,9 +51,9 @@
         "translate(" + margin.left + "," + margin.top + ")");
 
 
-    var margin_joules = { top: 30, right: 50, bottom: 50, left: 0 },
-      width_joules = 120 - margin_joules.left - margin_joules.right,
-      height_joules = 400 - margin_joules.top - margin_joules.bottom;
+    var margin_joules = { top: 0.3*basesize, right: 0.5*basesize, bottom: 0.5*basesize, left: 0 },
+      width_joules = 1.2*basesize - margin_joules.left - margin_joules.right,
+      height_joules = 4*basesize - margin_joules.top - margin_joules.bottom;
 
     // append the svg object to the body of the page
     var svg_joules = d3.select("#my_dataviz")
@@ -62,7 +66,7 @@
 
     // Add Y axis
     var y_joules = d3.scaleLinear()
-      .domain([0, 60])
+      .domain([0, maxjoules])
       .range([height_joules, 0]);
     svg_joules.append("g")
       .attr("transform", "translate(" + margin_joules.right + ",0)")
@@ -80,9 +84,9 @@
     joulesbar = svg_joules.append("rect")
       .attr("fill", "#ff0000")
       .attr("x", margin_joules.right + width_joules / 4)
-      .attr("y", y_joules(15))
+      .attr("y", y_joules(0))
       .attr("width", width_joules / 2)
-      .attr("height", height_joules - y_joules(15));
+      .attr("height", height_joules - y_joules(0));
 
     // var the_data = d3.csv("https://raw.githubusercontent.com/jcjveraa/dropsonline/master/data.raw.csv", function (d) {
     //   //console.log(d);
@@ -119,7 +123,7 @@
         // Add Y axis
         var y = d3.scaleLinear()
           //.domain([0, d3.max(data, function (d) { return d.slight; })])
-          .domain([0, 15])
+          .domain([0, maxheight])
           .range([height, 0]);
         svg.append("g")
           .call(d3.axisLeft(y));
@@ -128,7 +132,7 @@
         // Add Y axis
         var y_ft = d3.scaleLinear()
           //.domain([0, d3.max(data, function (d) { return d.slight; })])
-          .domain([0, 15 * 3.2808399])
+          .domain([0, maxheight * 3.2808399])
           .range([height, 0]);
         svg.append("g")
           .attr("transform", "translate(" + width + ",0)")
@@ -268,8 +272,8 @@
           var mass = d3.select("#mass_input").property("value");
           var height = d3.select("#height_input").property("value");
           var joules = mass * height * 9.81;
-          if (joules > 60) {
-            var joules = 60;
+          if (joules > maxjoules) {
+            var joules = maxjoules;
           }
           var joules_color = "#ff0000";
           if (joules < 40) {
