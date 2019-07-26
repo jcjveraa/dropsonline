@@ -33,13 +33,12 @@
       .attr("transform",
         "translate(" + margin.left + "," + margin.top + ")");
 
-    //Read the data
-    d3.csv("https://raw.githubusercontent.com/jcjveraa/dropsonline/master/data.csv",
+    //Get the graph data
+    d3.csv("https://raw.githubusercontent.com/jcjveraa/dropsonline/master/data.clipped.csv",
 
-      // When reading the csv, I must format variables:
       function (d) {
         //console.log(d);
-        return { mass: +d.Mass, slight: +d.Slight, minor: +d.Minor, major: +d.Major, fatality: +d.Fatality}
+        return { mass: +d.Mass, slight: +d.Slight, minor: +d.Minor, major: +d.Major, fatality: +d.Fatality }
       },
 
       // Now I can use this dataset:
@@ -47,45 +46,81 @@
         //console.log(data);
         // Add X axis --> it is a date format
         var x = d3.scaleLinear()
-          .domain([0, d3.max(data, function (d) { return +d.mass; })])
+          .domain([0, d3.max(data, function (d) { return d.mass; })])
           .range([0, width]);
         svg.append("g")
           .attr("transform", "translate(0," + height + ")")
           .call(d3.axisBottom(x));
 
+        var x_lbs = d3.scaleLinear()
+          .domain([0, d3.max(data, function (d) { return d.mass*2.20462262; })])
+          .range([0, width]);
+          svg.append("g")
+          .attr("transform", "translate(0," + margin.top + ")")
+          .call(d3.axisTop(x_lbs));
+
         // Add Y axis
         var y = d3.scaleLinear()
-          .domain([0, d3.max(data, function (d) { return +d.slight; })])
+          //.domain([0, d3.max(data, function (d) { return d.slight; })])
+          .domain([0, 15])
           .range([height, 0]);
         svg.append("g")
           .call(d3.axisLeft(y));
 
-        
 
-          
-        // Add the area
+        // // Background red fatal incident area
+        // svg.append("rect")
+        //   .attr("fill", "#ff0000")
+        //   // .attr("stroke", "#000000")
+        //   // .attr("stroke-width", 1.5)
+        //   .attr("x", 0)
+        //   .attr("y", 0)
+        //   .attr("width", width)
+        //   .attr("height", height)
+
+        // Major incident area
         svg.append("path")
           .datum(data)
-          .attr("fill", "#cce5df")
-          // .attr("stroke", "#00ff00")
-          // .attr("stroke-width", 1.5)
+          .attr("fill", "#ff6600")
+          .attr("stroke", "#000000")
+          .attr("stroke-width", 1.5)
           .attr("d", d3.area()
             .x(function (d) { return x(d.mass) })
             .y0(y(0))
             .y1(function (d) { return y(d.major) })
           )
 
-          // Add the area
+        // Minor incident area
         svg.append("path")
           .datum(data)
-          .attr("fill", "#cce5df")
-          .attr("stroke", "#69b3a2")
+          .attr("fill", "#ffff00")
+          .attr("stroke", "#000000")
+          .attr("stroke-width", 1.5)
+          .attr("d", d3.area()
+            .x(function (d) { return x(d.mass) })
+            .y0(y(0))
+            .y1(function (d) { return y(d.minor) })
+          )
+
+        // Slight incident area
+        svg.append("path")
+          .datum(data)
+          .attr("fill", "#00ff00")
+          .attr("stroke", "#000000")
           .attr("stroke-width", 1.5)
           .attr("d", d3.area()
             .x(function (d) { return x(d.mass) })
             .y0(y(0))
             .y1(function (d) { return y(d.slight) })
           )
+
+        // Indication of where this incident is
+        svg.append('circle')
+          .attr('cx', 100)
+          .attr('cy', 100)
+          .attr('r', 10)
+          .attr('stroke', 'black')
+          .attr('fill', '#69a3b2');
 
       })
 
