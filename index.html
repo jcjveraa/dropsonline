@@ -35,6 +35,7 @@
     var basesize = 150;
     var maxheight = 15;
     var maxjoules = 60;
+    var datasource = "https://raw.githubusercontent.com/jcjveraa/dropsonline/master/data.raw.csv";
 
     // set the dimensions and margins of the graph
     var margin = { top: 0.3*basesize, right: 0.5*basesize, bottom: 0.5*basesize, left: 0.5*basesize },
@@ -95,7 +96,7 @@
     // console.log(the_data);
 
     //Get the graph data
-    d3.csv("https://raw.githubusercontent.com/jcjveraa/dropsonline/master/data.raw.csv",
+    d3.csv(datasource,
 
       function (d) {
         //console.log(d);
